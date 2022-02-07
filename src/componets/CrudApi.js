@@ -20,7 +20,7 @@ const CrudApi = () => {
   const [loading, setLoading] = useState(false);
 
   let api = helpHttp();
-  //let url = "https://app-radioclubbackend.herokuapp.com/api/socios";
+  //let url = "https://app-radiobcknd.herokuapp.com/api/socios";
   let url = "http://localhost:3001/api/socios";
 
   useEffect(() => {

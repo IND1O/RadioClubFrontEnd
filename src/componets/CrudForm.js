@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import Swal from "sweetalert2";
-import "animate.css";
 
 const initialForm = {
   numero: "",
@@ -16,8 +14,61 @@ const initialForm = {
   id: null,
 };
 
+const validateForm = (form) => {
+  let errors = [];
+  let regexName = /^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s]+$/; //Solo letras y espacios en blancos
+  //let regexEmail = /^(\w+[/./-]?){1,}@[a-z]+[/.]\w{2,}$/;
+  let regexComments = /^.{1,10}$/; //solo acepta 10 caracteres
+  let regexMayu = /^([A-ZÁÉÍÓÚ]{1}[a-zñáéíóú]+[\s]*)+$/; //Primera letra en mayúscula
+
+  if (!form.numero.trim()) {
+    errors.numero = "El 'número de socio' es obligatorio";
+  }
+
+  if (!form.tipo.trim()) {
+    errors.tipo = "El 'tipo de socio' es obligatorio";
+  } else if (!regexName.test(form.tipo.trim())) {
+    errors.tipo = "El 'tipo de socio' solo acepta letras";
+  } else if (!regexMayu.test(form.tipo.trim())) {
+    errors.tipo = "El 'tipo de socio' lleva su primera letra en mayúscula";
+  }
+
+  if (!form.nombre.trim()) {
+    errors.nombre = "El 'nombre de socio' es obligatorio";
+  } else if (!regexName.test(form.nombre.trim())) {
+    errors.nombre = "El 'nombre' solo acepta letras y espacios en blancos";
+  } else if (!regexMayu.test(form.nombre.trim())) {
+    errors.nombre =
+      "En el campo 'nombre' la primera letra de cada palabra débe ser en mayúscula";
+  }
+
+  if (!form.licencia.trim()) {
+    errors.licencia = "La 'licencia del socio' es obligatoria";
+  } else if (!regexComments.test(form.licencia.trim())) {
+    errors.licencia =
+      "La 'licencia del socio' no debe exceder los 10 caracteres";
+  }
+
+  if (!form.dni.trim()) {
+    errors.dni = "El 'DNI del socio' es obligatorio";
+  }
+
+  if (!form.direccion.trim()) {
+    errors.direccion = "La 'dirección del socio' es obligatoria";
+  }
+
+  return errors;
+};
+
+let style = {
+  fontWeight: "bold",
+  color: "#dc3545",
+};
+
 const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
   const [form, setform] = useState(initialForm);
+  const [errors, setErrors] = useState({});
+
   let history = useHistory();
 
   useEffect(() => {
@@ -34,35 +85,16 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
       [e.target.name]: e.target.value,
     });
   };
+
+  const handdleBlur = (e) => {
+    handelChange(e);
+    setErrors(validateForm(form));
+  };
+
   const handelSubmit = (e) => {
     e.preventDefault();
-    if (
-      !form.nombre ||
-      !form.numero ||
-      !form.tipo ||
-      !form.licencia ||
-      !form.direccion ||
-      !form.dni
-    ) {
-      // Swal.fire({
-      //   icon: "error",
-      //   title: "Datos incompletos...",
-      //   text: "'Numero', 'Tipo', 'Nombre', 'Licencia', 'Dni' y 'Dirección' son obligatorios",
-      // });
-      Swal.fire({
-        icon: "error",
-        title: "Datos incompletos...",
-        confirmButtonColor: "#3085d6",
-        text: "'Numero', 'Tipo', 'Nombre', 'Licencia', 'Dni' y 'Dirección' son obligatorios",
-        showClass: {
-          popup: "animate__animated animate__bounceInDown",
-        },
-        hideClass: {
-          popup: "animate__animated animate__bounceOutRight",
-        },
-      });
-      return;
-    }
+    setErrors(validateForm(form));
+
     if (form.id === null) {
       createData(form);
     } else {
@@ -72,6 +104,7 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
   };
   const handelReset = (e) => {
     setform(initialForm);
+
     setDataToEdit(null);
     history.push("/");
   };
@@ -90,9 +123,11 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
                   type="number"
                   name="numero"
                   placeholder="Numero"
+                  onBlur={handdleBlur}
                   onChange={handelChange}
                   value={form.numero}
                 />
+                {errors.numero && <p style={style}>{errors.numero}</p>}
               </div>
               <div className="form-group">
                 <label>Tipo de Socio</label>
@@ -101,9 +136,11 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
                   type="text"
                   name="tipo"
                   placeholder="Tipo"
+                  onBlur={handdleBlur}
                   onChange={handelChange}
                   value={form.tipo}
                 />
+                {errors.tipo && <p style={style}>{errors.tipo}</p>}
               </div>
               <div className="form-group">
                 <label>Nombre del Socio</label>
@@ -112,9 +149,11 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
                   type="text"
                   name="nombre"
                   placeholder="Nombre"
+                  onBlur={handdleBlur}
                   onChange={handelChange}
                   value={form.nombre}
                 />
+                {errors.nombre && <p style={style}>{errors.nombre}</p>}
               </div>
               <div className="form-group">
                 <label>Licencia del Socio</label>
@@ -123,9 +162,11 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
                   type="text"
                   name="licencia"
                   placeholder="Licencia"
+                  onBlur={handdleBlur}
                   onChange={handelChange}
                   value={form.licencia}
                 />
+                {errors.licencia && <p style={style}>{errors.licencia}</p>}
               </div>
               <div className="form-group">
                 <label>DNI del Socio</label>
@@ -134,9 +175,11 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
                   type="number"
                   name="dni"
                   placeholder="DNI"
+                  onBlur={handdleBlur}
                   onChange={handelChange}
                   value={form.dni}
                 />
+                {errors.dni && <p style={style}>{errors.dni}</p>}
               </div>
               <div className="form-group">
                 <label>Dirección del Socio</label>
@@ -145,9 +188,11 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
                   type="text"
                   name="direccion"
                   placeholder="Dirección"
+                  onBlur={handdleBlur}
                   onChange={handelChange}
                   value={form.direccion}
                 />
+                {errors.direccion && <p style={style}>{errors.direccion}</p>}
               </div>
               <div className="form-group">
                 <label>Telefono del Socio</label>
@@ -156,6 +201,7 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
                   type="number"
                   name="telefono"
                   placeholder="Telefono"
+                  onBlur={handdleBlur}
                   onChange={handelChange}
                   value={form.telefono}
                 />
@@ -168,6 +214,7 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
                   type="text"
                   name="email"
                   placeholder="Email"
+                  onBlur={handdleBlur}
                   onChange={handelChange}
                   value={form.email}
                 />
@@ -179,6 +226,7 @@ const CrudForm = ({ createData, updateData, dataToEdit, setDataToEdit }) => {
                   type="date"
                   name="pago"
                   placeholder="Cuota"
+                  onBlur={handdleBlur}
                   onChange={handelChange}
                   value={form.pago}
                 />
